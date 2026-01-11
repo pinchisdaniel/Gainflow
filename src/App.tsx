@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Button } from "./components/ui/button";
 import { Alert, AlertDescription } from "./components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./components/ui/dialog";
-import { Dumbbell, Check, UserCircle, Gift } from "lucide-react";
+import { Dumbbell, Check, UserCircle, Gift, AlertTriangle } from "lucide-react";
 import { Input } from "./components/ui/input";
 import { Textarea } from "./components/ui/textarea";
 import { toast } from "sonner@2.0.3";
@@ -25,6 +25,7 @@ export default function App() {
   const [showThankYouDialog, setShowThankYouDialog] = useState(false);
   const [showNutritionistDialog, setShowNutritionistDialog] = useState(false);
   const [showDiscountDialog, setShowDiscountDialog] = useState(false);
+  const [showInsufficientIngredientsDialog, setShowInsufficientIngredientsDialog] = useState(false);
   const [email, setEmail] = useState("");
   const [nutritionistForm, setNutritionistForm] = useState({
     name: "",
@@ -45,6 +46,13 @@ export default function App() {
   const totalCarbs = selectedIngredientDetails.reduce((sum, ing) => sum + ing.carbs, 0);
   const totalFats = selectedIngredientDetails.reduce((sum, ing) => sum + ing.fats, 0);
 
+  // Validation: Check if user has selected sufficient ingredients
+  const selectedBaseIngredients = selectedIngredientDetails.filter(i => i.isBase);
+  const hasEnoughIngredients = selectedIngredients.length >= 3;
+  const hasBaseIngredient = selectedBaseIngredients.length >= 1;
+  const hasRequiredSweetener = selectedIngredients.includes("honey") || selectedIngredients.includes("maple");
+  const canProceedToOrder = hasEnoughIngredients && hasBaseIngredient && hasRequiredSweetener;
+
   const handleIngredientToggle = (ingredientId: string) => {
     setSelectedIngredients((prev) =>
       prev.includes(ingredientId)
@@ -63,7 +71,11 @@ export default function App() {
   };
 
   const handleCheckout = () => {
-    setShowThankYouDialog(true);
+    if (!canProceedToOrder) {
+      setShowInsufficientIngredientsDialog(true);
+    } else {
+      setShowThankYouDialog(true);
+    }
   };
 
   const handleContactNutritionist = () => {
@@ -84,7 +96,12 @@ export default function App() {
     if (activeTab === "flavor") {
       setActiveTab("ingredients");
     } else if (activeTab === "ingredients") {
-      setActiveTab("order");
+      // Validate ingredients before proceeding
+      if (!canProceedToOrder) {
+        setShowInsufficientIngredientsDialog(true);
+      } else {
+        setActiveTab("order");
+      }
     }
   };
 
@@ -373,6 +390,64 @@ export default function App() {
           </DialogHeader>
           <Button className="w-full" onClick={() => setShowDiscountDialog(false)}>
             Got it, thanks!
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Insufficient Ingredients Dialog */}
+      <Dialog open={showInsufficientIngredientsDialog} onOpenChange={setShowInsufficientIngredientsDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+              Cannot Proceed to Checkout
+            </DialogTitle>
+            <DialogDescription>
+              Your bar needs more ingredients to be safe and nutritious.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-2">
+              <div className="flex items-start gap-2">
+                <span className="text-red-600 mt-0.5">•</span>
+                <div className="text-gray-700">
+                  <span className="font-semibold">At least 3 total ingredients</span> 
+                  {selectedIngredients.length < 3 && (
+                    <span className="text-red-600"> (Currently: {selectedIngredients.length})</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-red-600 mt-0.5">•</span>
+                <div className="text-gray-700">
+                  <span className="font-semibold">At least 1 base ingredient</span> (highlighted with amber border)
+                  {!hasBaseIngredient && (
+                    <span className="text-red-600"> (Currently: 0)</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-red-600 mt-0.5">•</span>
+                <div className="text-gray-700">
+                  <span className="font-semibold">At least 1 sweetener</span> (honey or maple)
+                  {!hasRequiredSweetener && (
+                    <span className="text-red-600"> (Currently: 0)</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="text-sm text-gray-600 italic">
+              Base ingredients include nuts, nut butters, and sweeteners that form the foundation of your bar.
+            </div>
+          </div>
+          <Button 
+            className="w-full" 
+            onClick={() => {
+              setShowInsufficientIngredientsDialog(false);
+              setActiveTab("ingredients");
+            }}
+          >
+            Back to Ingredients
           </Button>
         </DialogContent>
       </Dialog>

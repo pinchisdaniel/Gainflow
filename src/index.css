@@ -61,6 +61,8 @@
   :root, :host {
     --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --color-red-50: oklch(.971 .013 17.38);
+    --color-red-200: oklch(.885 .062 18.334);
     --color-red-600: oklch(.577 .245 27.325);
     --color-amber-50: oklch(.987 .022 95.277);
     --color-amber-200: oklch(.924 .12 95.746);
@@ -962,6 +964,10 @@
     border-color: var(--input);
   }
 
+  .border-red-200 {
+    border-color: var(--color-red-200);
+  }
+
   .border-transparent {
     border-color: #0000;
   }
@@ -1038,6 +1044,10 @@
     .bg-primary\/20 {
       background-color: color-mix(in oklab, var(--primary) 20%, transparent);
     }
+  }
+
+  .bg-red-50 {
+    background-color: var(--color-red-50);
   }
 
   .bg-secondary {
@@ -1331,6 +1341,10 @@
 
   .uppercase {
     text-transform: uppercase;
+  }
+
+  .italic {
+    font-style: italic;
   }
 
   .underline-offset-4 {
