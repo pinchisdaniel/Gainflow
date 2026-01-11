@@ -23,7 +23,7 @@ export function NutritionPanel({
   const fatsPercent = total > 0 ? (totalFats / total) * 100 : 0;
 
   return (
-    <Card className="p-6 sticky top-4">
+    <Card className="p-6">
       <div className="space-y-6">
         <div>
           <h3>Nutrition Facts</h3>

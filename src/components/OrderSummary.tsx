@@ -2,8 +2,9 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
-import { Minus, Plus, ShoppingCart, Sparkles } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Sparkles, Tag } from "lucide-react";
 import { ingredients } from "./IngredientSelector";
+import { useState } from "react";
 
 interface OrderSummaryProps {
   flavor: string;
@@ -20,21 +21,50 @@ export function OrderSummary({
   onQuantityChange,
   onCheckout,
 }: OrderSummaryProps) {
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [promoError, setPromoError] = useState("");
+
   const pricePerBar = 4.99;
   const selectedIngredientDetails = ingredients.filter((i) =>
     selectedIngredients.includes(i.id)
   );
-  
+
   // Calculate ingredient costs
   const ingredientsCost = selectedIngredientDetails.reduce(
     (sum, ingredient) => sum + ingredient.price,
     0
   );
-  
+
   const totalPerBar = pricePerBar + ingredientsCost;
   const subtotal = totalPerBar * quantity;
   const shipping = quantity >= 12 ? 0 : 5.99;
-  const total = subtotal + shipping;
+
+  // Apply promo code discount
+  let discount = 0;
+  if (appliedPromo === "FIRST10") {
+    discount = subtotal * 0.1;
+  }
+
+  const total = subtotal + shipping - discount;
+
+  const handleApplyPromo = () => {
+    const code = promoCode.trim().toUpperCase();
+    if (code === "FIRST10") {
+      setAppliedPromo(code);
+      setPromoError("");
+    } else if (code === "") {
+      setPromoError("Please enter a promo code");
+    } else {
+      setPromoError("Invalid promo code");
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoCode("");
+    setPromoError("");
+  };
 
   return (
     <Card className="p-6">
@@ -116,6 +146,64 @@ export function OrderSummary({
             )}
           </div>
         </div>
+
+        {/* Promo Code Section */}
+        <div className="border-t border-gray-200 pt-4">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-gray-700 mb-2">
+              <Tag className="w-4 h-4" />
+              <span className="font-medium">Have a promo code?</span>
+            </div>
+            
+            {!appliedPromo ? (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Enter promo code"
+                    value={promoCode}
+                    onChange={(e) => {
+                      setPromoCode(e.target.value.toUpperCase());
+                      setPromoError("");
+                    }}
+                    className="flex-1"
+                  />
+                  <Button variant="outline" onClick={handleApplyPromo}>
+                    Apply
+                  </Button>
+                </div>
+                {promoError && (
+                  <p className="text-sm text-red-600">{promoError}</p>
+                )}
+              </div>
+            ) : (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-green-600 text-white">{appliedPromo}</Badge>
+                  <span className="text-sm text-green-700">10% discount applied!</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemovePromo}
+                  className="text-green-700 hover:text-green-800"
+                >
+                  Remove
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Discount Display */}
+        {discount > 0 && (
+          <div className="border-t border-gray-200 pt-4">
+            <div className="flex justify-between text-green-600">
+              <span>Discount (10%)</span>
+              <span>-${discount.toFixed(2)}</span>
+            </div>
+          </div>
+        )}
 
         <div className="border-t border-gray-200 pt-4">
           <div className="flex justify-between mb-4">

@@ -1,46 +1,49 @@
-import { useState } from "react";
-import { FlavorSelector } from "./components/FlavorSelector";
+import { useState, useEffect } from "react";
+import { FlavorSelector, flavors } from "./components/FlavorSelector";
 import { IngredientSelector, ingredients } from "./components/IngredientSelector";
 import { NutritionPanel } from "./components/NutritionPanel";
 import { ProductPreview } from "./components/ProductPreview";
 import { OrderSummary } from "./components/OrderSummary";
+import { CalorieCalculator } from "./components/CalorieCalculator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Button } from "./components/ui/button";
 import { Alert, AlertDescription } from "./components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./components/ui/dialog";
-import { Dumbbell, Check, UserCircle } from "lucide-react";
+import { Dumbbell, Check, UserCircle, Gift } from "lucide-react";
 import { Input } from "./components/ui/input";
+import { Textarea } from "./components/ui/textarea";
 import { toast } from "sonner@2.0.3";
 import { Toaster } from "./components/ui/sonner";
 
 export default function App() {
-  const [selectedFlavor, setSelectedFlavor] = useState("Chocolate Fudge");
-  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([
-    "whey",
-    "oats",
-    "almonds",
-    "dates",
-  ]);
+  const [selectedFlavor, setSelectedFlavor] = useState("Chocolate");
+  const [selectedIngredients, setSelectedIngredients] = useState<string[]>(
+    flavors.find(f => f.name === "Chocolate")?.ingredientIds || []
+  );
   const [quantity, setQuantity] = useState(6);
   const [activeTab, setActiveTab] = useState("flavor");
   const [showThankYouDialog, setShowThankYouDialog] = useState(false);
+  const [showNutritionistDialog, setShowNutritionistDialog] = useState(false);
+  const [showDiscountDialog, setShowDiscountDialog] = useState(false);
   const [email, setEmail] = useState("");
+  const [nutritionistForm, setNutritionistForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    description: "",
+  });
 
   // Calculate nutrition totals
-  const flavorCalories = 320; // Base calories from flavor
+  const selectedFlavorData = flavors.find(f => f.name === selectedFlavor);
   const selectedIngredientDetails = ingredients.filter((i) =>
     selectedIngredients.includes(i.id)
   );
 
-  const totalCalories =
-    flavorCalories +
-    selectedIngredientDetails.reduce((sum, i) => sum + i.calories, 0);
-  const totalProtein = selectedIngredientDetails.reduce(
-    (sum, i) => sum + i.protein,
-    0
-  );
-  const totalCarbs = selectedIngredientDetails.reduce((sum, i) => sum + i.carbs, 0);
-  const totalFats = selectedIngredientDetails.reduce((sum, i) => sum + i.fats, 0);
+  // Calculate nutrition values dynamically based on selected ingredients
+  const totalCalories = selectedIngredientDetails.reduce((sum, ing) => sum + ing.calories, 0);
+  const totalProtein = selectedIngredientDetails.reduce((sum, ing) => sum + ing.protein, 0);
+  const totalCarbs = selectedIngredientDetails.reduce((sum, ing) => sum + ing.carbs, 0);
+  const totalFats = selectedIngredientDetails.reduce((sum, ing) => sum + ing.fats, 0);
 
   const handleIngredientToggle = (ingredientId: string) => {
     setSelectedIngredients((prev) =>
@@ -50,14 +53,21 @@ export default function App() {
     );
   };
 
+  const handleFlavorChange = (flavor: string) => {
+    setSelectedFlavor(flavor);
+    // Automatically select the ingredients for this flavor
+    const flavorData = flavors.find(f => f.name === flavor);
+    if (flavorData) {
+      setSelectedIngredients(flavorData.ingredientIds);
+    }
+  };
+
   const handleCheckout = () => {
     setShowThankYouDialog(true);
   };
 
   const handleContactNutritionist = () => {
-    toast.info("Contact Nutritionist", {
-      description: "Our nutrition team will reach out to you within 24 hours!",
-    });
+    setShowNutritionistDialog(true);
   };
 
   const handleSubscribe = (e: React.FormEvent) => {
@@ -77,6 +87,13 @@ export default function App() {
       setActiveTab("order");
     }
   };
+
+  // Show discount dialog when navigating to order tab for the first time
+  useEffect(() => {
+    if (activeTab === "order" && !showDiscountDialog) {
+      setShowDiscountDialog(true);
+    }
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -137,7 +154,7 @@ export default function App() {
               <TabsContent value="flavor" className="space-y-6 mt-6">
                 <FlavorSelector
                   selectedFlavor={selectedFlavor}
-                  onFlavorChange={setSelectedFlavor}
+                  onFlavorChange={handleFlavorChange}
                 />
                 <Button className="w-full" size="lg" onClick={handleNextTab}>
                   Continue to Ingredients
@@ -168,13 +185,16 @@ export default function App() {
 
           {/* Right Column - Nutrition Info */}
           <div className="lg:col-span-1">
-            <NutritionPanel
-              totalCalories={totalCalories}
-              totalProtein={totalProtein}
-              totalCarbs={totalCarbs}
-              totalFats={totalFats}
-              quantity={quantity}
-            />
+            <div className="space-y-6">
+              <NutritionPanel
+                totalCalories={totalCalories}
+                totalProtein={totalProtein}
+                totalCarbs={totalCarbs}
+                totalFats={totalFats}
+                quantity={quantity}
+              />
+              <CalorieCalculator caloriesPerBar={totalCalories} />
+            </div>
           </div>
         </div>
       </main>
@@ -232,7 +252,7 @@ export default function App() {
               <Check className="w-6 h-6 text-green-600" />
               Thank You for Your Order!
             </DialogTitle>
-            <DialogDescription className="space-y-3 pt-4">
+            <div className="space-y-3 pt-4 text-sm text-gray-600">
               <p>Your custom GainFlow bars are being prepared with care.</p>
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 <div className="flex justify-between">
@@ -249,10 +269,110 @@ export default function App() {
                 </div>
               </div>
               <p className="text-center pt-2">A confirmation email has been sent to your inbox.</p>
-            </DialogDescription>
+            </div>
           </DialogHeader>
           <Button className="w-full" onClick={() => setShowThankYouDialog(false)}>
             Continue Shopping
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Nutritionist Contact Dialog */}
+      <Dialog open={showNutritionistDialog} onOpenChange={setShowNutritionistDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <UserCircle className="w-6 h-6 text-green-600" />
+              Contact a Nutritionist
+            </DialogTitle>
+            <DialogDescription>
+              Get personalized nutrition advice from our team.
+            </DialogDescription>
+          </DialogHeader>
+          <form 
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              toast.success("Request Submitted!", {
+                description: "Our nutrition team will reach out to you within 24 hours!",
+              });
+              setNutritionistForm({
+                name: "",
+                email: "",
+                phone: "",
+                description: "",
+              });
+              setShowNutritionistDialog(false);
+            }}
+          >
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">Name</label>
+              <Input
+                type="text"
+                placeholder="Your Name"
+                value={nutritionistForm.name}
+                onChange={(e) => setNutritionistForm({ ...nutritionistForm, name: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">Email</label>
+              <Input
+                type="email"
+                placeholder="Your Email"
+                value={nutritionistForm.email}
+                onChange={(e) => setNutritionistForm({ ...nutritionistForm, email: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">Phone</label>
+              <Input
+                type="tel"
+                placeholder="Your Phone"
+                value={nutritionistForm.phone}
+                onChange={(e) => setNutritionistForm({ ...nutritionistForm, phone: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">What can we help you with?</label>
+              <Textarea
+                placeholder="Tell us about your nutrition goals and questions..."
+                value={nutritionistForm.description}
+                onChange={(e) => setNutritionistForm({ ...nutritionistForm, description: e.target.value })}
+                required
+                rows={4}
+              />
+            </div>
+            <Button type="submit" className="w-full">Submit Request</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* First-Time Customer Discount Dialog */}
+      <Dialog open={showDiscountDialog} onOpenChange={setShowDiscountDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Gift className="w-6 h-6 text-green-600" />
+              Welcome, First-Time Customer!
+            </DialogTitle>
+            <DialogDescription>
+              Exclusive offer for new GainFlow customers
+            </DialogDescription>
+            <div className="space-y-3 pt-4">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border-2 border-green-300 text-center">
+                <p className="text-3xl font-bold text-green-700 mb-2">10% OFF</p>
+                <p className="text-gray-700">Your First Purchase</p>
+              </div>
+              <p className="text-gray-600 text-sm text-center">
+                Subscribe to our newsletter at the bottom of this page to receive your exclusive <span className="font-bold text-black">FIRST10</span> promo code and save 10% on your first order!
+              </p>
+            </div>
+          </DialogHeader>
+          <Button className="w-full" onClick={() => setShowDiscountDialog(false)}>
+            Got it, thanks!
           </Button>
         </DialogContent>
       </Dialog>
