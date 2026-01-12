@@ -50,7 +50,7 @@ const flavors: Flavor[] = [
   },
   { 
     name: "Vanilla Dream", 
-    color: "#F4E4C1", // Vanilla/cream color to match vanilla bar
+    color: "#76dfff", // Vanilla/cream color to match vanilla bar
     calories: 681,
     totalProtein: 34,
     totalFat: 49,
