@@ -111,7 +111,7 @@ export function OrderSummary({
                       )}
                     </div>
                     <span className="text-gray-600">
-                      {isIncludedInBase ? "—" : `$${ingredient.price.toFixed(2)}`}
+                      {isIncludedInBase ? "—" : `€${ingredient.price.toFixed(2)}`}
                     </span>
                   </div>
                 );
@@ -146,21 +146,21 @@ export function OrderSummary({
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-600">Price per bar</span>
-              <span>${basePricePerBar.toFixed(2)}</span>
+              <span>€{basePricePerBar.toFixed(2)}</span>
             </div>
             {ingredientsCost > 0 && (
               <div className="flex justify-between">
                 <span className="text-gray-600">Ingredients cost</span>
-                <span>${ingredientsCost.toFixed(2)}</span>
+                <span>€{ingredientsCost.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span className="text-gray-600">Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>€{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Shipping</span>
-              <span>{shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}</span>
+              <span>{shipping === 0 ? "FREE" : `€${shipping.toFixed(2)}`}</span>
             </div>
             {quantity >= 8 && (
               <div className="flex items-center gap-2 text-green-600">
@@ -224,7 +224,7 @@ export function OrderSummary({
           <div className="border-t border-gray-200 pt-4">
             <div className="flex justify-between text-green-600">
               <span>Discount (10%)</span>
-              <span>-${discount.toFixed(2)}</span>
+              <span>-€{discount.toFixed(2)}</span>
             </div>
           </div>
         )}
@@ -232,7 +232,7 @@ export function OrderSummary({
         <div className="border-t border-gray-200 pt-4">
           <div className="flex justify-between mb-4">
             <span>Total</span>
-            <span className="text-2xl">${total.toFixed(2)}</span>
+            <span className="text-2xl">€{total.toFixed(2)}</span>
           </div>
           <Button className="w-full" size="lg" onClick={onCheckout}>
             Proceed to Checkout

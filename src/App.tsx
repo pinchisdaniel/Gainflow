@@ -193,7 +193,7 @@ export default function App() {
             <div className="hidden md:flex items-center gap-4">
               <div className="text-center">
                 <p className="text-gray-600">Starting at</p>
-                <p>$4.99/bar</p>
+                <p>€4.99/bar</p>
               </div>
               <Button variant="outline" onClick={handleContactNutritionist} className="gap-2">
                 <UserCircle className="w-4 h-4" />

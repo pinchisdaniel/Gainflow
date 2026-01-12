@@ -174,7 +174,7 @@ export function IngredientSelector({ selectedIngredients, onIngredientToggle, ha
                             <p className="text-xs text-gray-500 mt-0.5">{ingredient.caloriesPer100g} kcal/100g</p>
                           </div>
                           <p className={`${isDisabled ? "text-gray-400" : "text-green-600"}`}>
-                            ${ingredient.price.toFixed(2)}
+                            €{ingredient.price.toFixed(2)}
                           </p>
                         </div>
                         <div className="flex gap-2 mt-2 flex-wrap">
