@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import matchaImage from "figma:asset/fbc6f1d41a92692ad96f56db6bb77acab75fb618.png";
-import vanillaImage from "figma:asset/9d6ac9dc51da7e3dfad4703eb06daa108725a01c.png";
-import forestFruitsImage from "figma:asset/44faeeec300e988671e6ab1257835f416bf9a892.png";
-import chocolateImage from "figma:asset/17c3e638d65dc825c3121f3e8a370e2d60dfd10f.png";
+import chocolateImage from 
+import forestFruitsImage from "@/assets/fruitsbar.png";
+import matchaImage from "@/assets/pistachiobar.png";
+import vanillaImage from "@/assets/vanillabar.png";
+
+
 
 interface ProductPreviewProps {
   flavor: string;
