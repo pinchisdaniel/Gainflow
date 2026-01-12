@@ -32,7 +32,7 @@ interface Flavor {
 const flavors: Flavor[] = [
   { 
     name: "Forest Fruits", 
-    color: "#b1078d", 
+    color: "#C85A7D", // Berry/pink-red color to match forest fruits bar
     calories: 645,
     totalProtein: 31,
     totalFat: 44,
@@ -50,7 +50,7 @@ const flavors: Flavor[] = [
   },
   { 
     name: "Vanilla Dream", 
-    color: "#F5E6D3", 
+    color: "#F4E4C1", // Vanilla/cream color to match vanilla bar
     calories: 681,
     totalProtein: 34,
     totalFat: 49,
@@ -69,7 +69,7 @@ const flavors: Flavor[] = [
   },
   { 
     name: "Chocolate", 
-    color: "#884804", 
+    color: "#5D4037", // Rich chocolate brown to match chocolate bar
     calories: 650,
     totalProtein: 34,
     totalFat: 53,
@@ -89,7 +89,7 @@ const flavors: Flavor[] = [
   },
   { 
     name: "Matcha Pistachio", 
-    color: "#90C695", 
+    color: "#A8D5BA", // Matcha green to match matcha pistachio bar
     calories: 653,
     totalProtein: 28,
     totalFat: 50.5,

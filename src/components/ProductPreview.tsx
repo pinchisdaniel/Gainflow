@@ -1,14 +1,10 @@
 import { useState, useEffect } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-
 const chocolateImage = "/assets/chocolate.png";
 const forestFruitsImage = "/assets/fruits.png";
 const matchaImage = "/assets/pistachio.png";
 const vanillaImage = "/assets/vanilla.png";
-
-
-
 
 interface ProductPreviewProps {
   flavor: string;

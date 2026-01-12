@@ -29,6 +29,8 @@ export default function App() {
   const [showInsufficientIngredientsDialog, setShowInsufficientIngredientsDialog] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [hasSubscribedToNewsletter, setHasSubscribedToNewsletter] = useState(false);
+  const [hasNutAllergy, setHasNutAllergy] = useState(false);
+  const [allergenicNuts, setAllergenicNuts] = useState<string[]>([]);
   const [email, setEmail] = useState("");
   const [nutritionistForm, setNutritionistForm] = useState({
     name: "",
@@ -60,14 +62,62 @@ export default function App() {
   const hasEnoughIngredients = selectedIngredients.length >= 3;
   const hasBaseIngredient = selectedBaseIngredients.length >= 1;
   const hasRequiredSweetener = selectedIngredients.includes("honey") || selectedIngredients.includes("maple");
-  const canProceedToOrder = hasEnoughIngredients && hasBaseIngredient && hasRequiredSweetener;
+  
+  // Check for at least one nut AND one nut butter
+  const pureNuts = ["almonds", "walnuts", "cashews", "hazelnuts", "pistachios", "macadamia"];
+  const nutButters = ["cashew-butter", "almond-butter"];
+  const allNutIngredients = [...pureNuts, ...nutButters];
+  
+  const hasNut = pureNuts.some(nutId => selectedIngredients.includes(nutId));
+  const hasNutButter = nutButters.some(butterId => selectedIngredients.includes(butterId));
+  
+  // If user has nut allergy, they can skip nut requirements
+  const canProceedToOrder = hasNutAllergy 
+    ? hasEnoughIngredients && hasBaseIngredient && hasRequiredSweetener
+    : hasEnoughIngredients && hasBaseIngredient && hasRequiredSweetener && hasNut && hasNutButter;
 
   const handleIngredientToggle = (ingredientId: string) => {
+    // Prevent toggling nut ingredients if user is allergic to them specifically
+    if (allergenicNuts.includes(ingredientId)) {
+      const ingredient = ingredients.find(i => i.id === ingredientId);
+      toast.error("Allergy Alert", {
+        description: `You cannot select ${ingredient?.name} as you've indicated an allergy to it.`,
+      });
+      return;
+    }
+    
     setSelectedIngredients((prev) =>
       prev.includes(ingredientId)
         ? prev.filter((id) => id !== ingredientId)
         : [...prev, ingredientId]
     );
+  };
+  
+  const handleNutAllergyToggle = (checked: boolean) => {
+    setHasNutAllergy(checked);
+    
+    // Clear allergenic nuts selection when unchecking
+    if (!checked) {
+      setAllergenicNuts([]);
+    }
+  };
+  
+  const handleAllergenicNutToggle = (nutId: string) => {
+    setAllergenicNuts((prev) => {
+      const newAllergies = prev.includes(nutId)
+        ? prev.filter((id) => id !== nutId)
+        : [...prev, nutId];
+      
+      // Remove newly allergenic ingredients from selected ingredients
+      if (!prev.includes(nutId) && selectedIngredients.includes(nutId)) {
+        setSelectedIngredients((current) => current.filter(id => id !== nutId));
+        toast.info("Ingredient Removed", {
+          description: `${ingredients.find(i => i.id === nutId)?.name} has been removed from your selection.`,
+        });
+      }
+      
+      return newAllergies;
+    });
   };
 
   const handleFlavorChange = (flavor: string) => {
@@ -193,6 +243,10 @@ export default function App() {
                 <IngredientSelector
                   selectedIngredients={selectedIngredients}
                   onIngredientToggle={handleIngredientToggle}
+                  hasNutAllergy={hasNutAllergy}
+                  onNutAllergyToggle={handleNutAllergyToggle}
+                  allergenicNuts={allergenicNuts}
+                  onAllergenicNutToggle={handleAllergenicNutToggle}
                 />
                 <Button className="w-full" size="lg" onClick={handleNextTab}>
                   Continue to Order
@@ -455,9 +509,27 @@ export default function App() {
                   )}
                 </div>
               </div>
+              {!hasNutAllergy && (
+                <div className="flex items-start gap-2">
+                  <span className="text-red-600 mt-0.5">•</span>
+                  <div className="text-gray-700">
+                    <span className="font-semibold">At least 1 nut and 1 nut butter</span> (almonds, walnuts, cashews, hazelnuts, pistachios, macadamia, cashew-butter, almond-butter)
+                    {!hasNut && (
+                      <span className="text-red-600"> (Currently: 0 nuts)</span>
+                    )}
+                    {!hasNutButter && (
+                      <span className="text-red-600"> (Currently: 0 nut butters)</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="text-sm text-gray-600 italic">
-              Base ingredients include nuts, nut butters, and sweeteners that form the foundation of your bar.
+              {hasNutAllergy ? (
+                <span className="text-orange-600 font-semibold">Nut allergy mode is active - nut requirements are waived.</span>
+              ) : (
+                "Base ingredients include nuts, nut butters, and sweeteners that form the foundation of your bar."
+              )}
             </div>
           </div>
           <Button 

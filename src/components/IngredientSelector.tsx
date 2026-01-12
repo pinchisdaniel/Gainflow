@@ -1,7 +1,8 @@
 import { Card } from "./ui/card";
 import { Checkbox } from "./ui/checkbox";
 import { Badge } from "./ui/badge";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription } from "./ui/alert";
 
 export interface Ingredient {
   id: string;
@@ -20,6 +21,10 @@ export interface Ingredient {
 interface IngredientSelectorProps {
   selectedIngredients: string[];
   onIngredientToggle: (ingredientId: string) => void;
+  hasNutAllergy?: boolean;
+  onNutAllergyToggle?: (checked: boolean) => void;
+  allergenicNuts?: string[];
+  onAllergenicNutToggle?: (nutId: string) => void;
 }
 
 const ingredients: Ingredient[] = [
@@ -58,14 +63,74 @@ const categoryLabels = {
   extras: "Additional Toppings",
 };
 
-export function IngredientSelector({ selectedIngredients, onIngredientToggle }: IngredientSelectorProps) {
+export function IngredientSelector({ selectedIngredients, onIngredientToggle, hasNutAllergy, onNutAllergyToggle, allergenicNuts, onAllergenicNutToggle }: IngredientSelectorProps) {
   const categories = ["protein", "carbs", "healthy-fats", "extras"] as const;
+  const nutIngredients = ["almonds", "walnuts", "cashews", "hazelnuts", "pistachios", "macadamia", "cashew-butter", "almond-butter", "crushed-hazelnuts", "chopped-pistachios"];
 
   return (
     <div className="space-y-6">
       <div>
         <h3>Customize Ingredients</h3>
         <p className="text-gray-600 mt-1">Build your perfect nutritional profile</p>
+        
+        {/* Allergy Warning Alert */}
+        <Alert className="mt-3 bg-red-50 border-red-200">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            <span className="font-semibold">Allergy Warning:</span> Some bars contain nuts. Please check the ingredients carefully.
+          </AlertDescription>
+        </Alert>
+        
+        {/* Nut Allergy Checkbox */}
+        {onNutAllergyToggle && (
+          <div className="mt-3 space-y-3">
+            <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-md px-3 py-2">
+              <Checkbox 
+                id="nut-allergy" 
+                checked={hasNutAllergy} 
+                onCheckedChange={onNutAllergyToggle}
+              />
+              <label htmlFor="nut-allergy" className="text-sm cursor-pointer flex-1">
+                I have a nut allergy
+              </label>
+            </div>
+            
+            {/* Allergenic Nuts Selector - Shows when nut allergy is checked */}
+            {hasNutAllergy && onAllergenicNutToggle && allergenicNuts && (
+              <Card className="p-4 bg-red-50 border-red-200">
+                <h4 className="text-sm mb-3">Select which nuts you're allergic to:</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {nutIngredients.map((nutId) => {
+                    const ingredient = ingredients.find(i => i.id === nutId);
+                    if (!ingredient) return null;
+                    
+                    return (
+                      <div
+                        key={nutId}
+                        className="flex items-center gap-2 p-2 rounded hover:bg-red-100 cursor-pointer"
+                        onClick={() => onAllergenicNutToggle(nutId)}
+                      >
+                        <Checkbox
+                          id={`allergen-${nutId}`}
+                          checked={allergenicNuts.includes(nutId)}
+                          onCheckedChange={() => onAllergenicNutToggle(nutId)}
+                        />
+                        <label htmlFor={`allergen-${nutId}`} className="text-sm cursor-pointer flex items-center gap-2">
+                          <span className="text-lg">{ingredient.icon}</span>
+                          <span>{ingredient.name}</span>
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-gray-600 mt-3 italic">
+                  Selected nuts will be disabled and removed from your ingredient options
+                </p>
+              </Card>
+            )}
+          </div>
+        )}
+        
         <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mt-2">
           💡 <span className="font-semibold">Base ingredients</span> are highlighted with a colored border — these are the primary nuts and sweeteners that form the foundation of your bar
         </p>
@@ -80,27 +145,37 @@ export function IngredientSelector({ selectedIngredients, onIngredientToggle }: 
             <div className="grid gap-3">
               {categoryIngredients.map((ingredient) => {
                 const isSelected = selectedIngredients.includes(ingredient.id);
+                const isNutIngredient = nutIngredients.includes(ingredient.id);
+                const isAllergenicNut = allergenicNuts?.includes(ingredient.id) || false;
+                const isDisabled = isAllergenicNut;
                 
                 return (
                   <Card
                     key={ingredient.id}
-                    className={`p-4 cursor-pointer transition-all ${
+                    className={`p-4 transition-all ${
                       ingredient.isBase ? "border-2 border-amber-400" : ""
                     } ${
                       isSelected ? "ring-2 ring-black bg-gray-50" : "hover:bg-gray-50"
+                    } ${
+                      isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                     }`}
-                    onClick={() => onIngredientToggle(ingredient.id)}
+                    onClick={() => !isDisabled && onIngredientToggle(ingredient.id)}
                   >
                     <div className="flex items-center gap-4">
-                      <Checkbox checked={isSelected} />
+                      <Checkbox checked={isSelected} disabled={isDisabled} />
                       <div className="text-2xl">{ingredient.icon}</div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p>{ingredient.name}</p>
+                            <p className={isDisabled ? "text-gray-400" : ""}>
+                              {ingredient.name}
+                              {isDisabled && <span className="ml-2 text-xs text-red-600">(Allergic)</span>}
+                            </p>
                             <p className="text-xs text-gray-500 mt-0.5">{ingredient.caloriesPer100g} kcal/100g</p>
                           </div>
-                          <p className="text-green-600">${ingredient.price.toFixed(2)}</p>
+                          <p className={`${isDisabled ? "text-gray-400" : "text-green-600"}`}>
+                            ${ingredient.price.toFixed(2)}
+                          </p>
                         </div>
                         <div className="flex gap-2 mt-2 flex-wrap">
                           <Badge variant="outline">{ingredient.calories} cal</Badge>
@@ -109,10 +184,12 @@ export function IngredientSelector({ selectedIngredients, onIngredientToggle }: 
                           <Badge variant="outline">{ingredient.fats}g fat</Badge>
                         </div>
                       </div>
-                      {isSelected ? (
-                        <Minus className="w-5 h-5 text-gray-600" />
-                      ) : (
-                        <Plus className="w-5 h-5 text-gray-600" />
+                      {!isDisabled && (
+                        isSelected ? (
+                          <Minus className="w-5 h-5 text-gray-600" />
+                        ) : (
+                          <Plus className="w-5 h-5 text-gray-600" />
+                        )
                       )}
                     </div>
                   </Card>
