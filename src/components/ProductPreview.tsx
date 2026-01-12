@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import chocolateImage from 
-import forestFruitsImage from "@/assets/fruitsbar.png";
-import matchaImage from "@/assets/pistachiobar.png";
-import vanillaImage from "@/assets/vanillabar.png";
+
+const chocolateImage = "/assets/chocolate.png";
+const forestFruitsImage = "/assets/fruits.png";
+const matchaImage = "/assets/pistachio.png";
+const vanillaImage = "/assets/vanilla.png";
+
 
 
 
