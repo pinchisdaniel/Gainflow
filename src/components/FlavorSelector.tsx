@@ -32,7 +32,7 @@ interface Flavor {
 const flavors: Flavor[] = [
   { 
     name: "Forest Fruits", 
-    color: "#8B4513", 
+    color: "#b1078d", 
     calories: 645,
     totalProtein: 31,
     totalFat: 44,
@@ -69,7 +69,7 @@ const flavors: Flavor[] = [
   },
   { 
     name: "Chocolate", 
-    color: "#4A4A4A", 
+    color: "#884804", 
     calories: 650,
     totalProtein: 34,
     totalFat: 53,
