@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge";
 import matchaImage from "figma:asset/fbc6f1d41a92692ad96f56db6bb77acab75fb618.png";
 import vanillaImage from "figma:asset/9d6ac9dc51da7e3dfad4703eb06daa108725a01c.png";
 import forestFruitsImage from "figma:asset/44faeeec300e988671e6ab1257835f416bf9a892.png";
+import chocolateImage from "figma:asset/17c3e638d65dc825c3121f3e8a370e2d60dfd10f.png";
 
 interface ProductPreviewProps {
   flavor: string;
@@ -15,6 +16,7 @@ const barImages = [
   { src: forestFruitsImage, alt: "Forest Fruits Flavor Bar" },
   { src: vanillaImage, alt: "Vanilla Flavor Bar" },
   { src: matchaImage, alt: "Matcha & Pistachio Flavor Bar" },
+  { src: chocolateImage, alt: "Chocolate Flavor Bar" },
 ];
 
 export function ProductPreview({ flavor, ingredientCount, totalCalories }: ProductPreviewProps) {

@@ -2,6 +2,7 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import { ingredients } from "./IngredientSelector";
 
 interface FlavorSelectorProps {
   selectedFlavor: string;
@@ -108,6 +109,14 @@ const flavors: Flavor[] = [
 export function FlavorSelector({ selectedFlavor, onFlavorChange }: FlavorSelectorProps) {
   const [expandedFlavor, setExpandedFlavor] = useState<string | null>(null);
 
+  // Calculate calories from actual ingredient IDs
+  const getFlavorCalories = (ingredientIds: string[]) => {
+    return ingredientIds.reduce((total, id) => {
+      const ingredient = ingredients.find(ing => ing.id === id);
+      return total + (ingredient?.calories || 0);
+    }, 0);
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -115,7 +124,10 @@ export function FlavorSelector({ selectedFlavor, onFlavorChange }: FlavorSelecto
         <p className="text-gray-600 mt-1">You can order one of these 4 original products as a complete bar, or customize them further by adding or removing ingredients in the Ingredients tab</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {flavors.map((flavor) => (
+        {flavors.map((flavor) => {
+          const calculatedCalories = getFlavorCalories(flavor.ingredientIds);
+          
+          return (
           <Card
             key={flavor.name}
             className={`overflow-hidden transition-all ${
@@ -141,7 +153,7 @@ export function FlavorSelector({ selectedFlavor, onFlavorChange }: FlavorSelecto
                 <div>
                   <p>{flavor.name}</p>
                   <Badge variant="secondary" className="mt-2">
-                    {flavor.calories} cal
+                    {calculatedCalories} cal
                   </Badge>
                 </div>
                 <button
@@ -188,7 +200,8 @@ export function FlavorSelector({ selectedFlavor, onFlavorChange }: FlavorSelecto
               </div>
             )}
           </Card>
-        ))}
+        );
+        })}
       </div>
     </div>
   );

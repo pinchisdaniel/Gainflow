@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Minus, Plus, ShoppingCart, Sparkles, Tag } from "lucide-react";
 import { ingredients } from "./IngredientSelector";
+import { flavors } from "./FlavorSelector";
 import { useState } from "react";
 
 interface OrderSummaryProps {
@@ -12,6 +13,7 @@ interface OrderSummaryProps {
   quantity: number;
   onQuantityChange: (quantity: number) => void;
   onCheckout: () => void;
+  hasSubscribedToNewsletter: boolean;
 }
 
 export function OrderSummary({
@@ -20,25 +22,35 @@ export function OrderSummary({
   quantity,
   onQuantityChange,
   onCheckout,
+  hasSubscribedToNewsletter,
 }: OrderSummaryProps) {
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
   const [promoError, setPromoError] = useState("");
 
-  const pricePerBar = 4.99;
+  const basePricePerBar = 5.00; // Base price for original flavor bar
+  
+  // Get the original flavor's ingredient list
+  const originalFlavor = flavors.find(f => f.name === flavor);
+  const originalIngredientIds = originalFlavor?.ingredientIds || [];
+  
   const selectedIngredientDetails = ingredients.filter((i) =>
     selectedIngredients.includes(i.id)
   );
 
-  // Calculate ingredient costs
-  const ingredientsCost = selectedIngredientDetails.reduce(
+  // Calculate ingredient costs only for ADDED ingredients (not in original recipe)
+  const addedIngredients = selectedIngredientDetails.filter(
+    (ingredient) => !originalIngredientIds.includes(ingredient.id)
+  );
+  
+  const ingredientsCost = addedIngredients.reduce(
     (sum, ingredient) => sum + ingredient.price,
     0
   );
 
-  const totalPerBar = pricePerBar + ingredientsCost;
+  const totalPerBar = basePricePerBar + ingredientsCost;
   const subtotal = totalPerBar * quantity;
-  const shipping = quantity >= 12 ? 0 : 5.99;
+  const shipping = quantity >= 8 ? 0 : 5.99;
 
   // Apply promo code discount
   let discount = 0;
@@ -51,8 +63,12 @@ export function OrderSummary({
   const handleApplyPromo = () => {
     const code = promoCode.trim().toUpperCase();
     if (code === "FIRST10") {
-      setAppliedPromo(code);
-      setPromoError("");
+      if (!hasSubscribedToNewsletter) {
+        setPromoError("Please subscribe to our newsletter to use this promo code");
+      } else {
+        setAppliedPromo(code);
+        setPromoError("");
+      }
     } else if (code === "") {
       setPromoError("Please enter a promo code");
     } else {
@@ -83,15 +99,23 @@ export function OrderSummary({
           <div>
             <p className="text-gray-600 mb-2">Ingredients ({selectedIngredients.length})</p>
             <div className="space-y-2">
-              {selectedIngredientDetails.map((ingredient) => (
-                <div key={ingredient.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span>{ingredient.icon}</span>
-                    <span>{ingredient.name}</span>
+              {selectedIngredientDetails.map((ingredient) => {
+                const isIncludedInBase = originalIngredientIds.includes(ingredient.id);
+                return (
+                  <div key={ingredient.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span>{ingredient.icon}</span>
+                      <span>{ingredient.name}</span>
+                      {isIncludedInBase && (
+                        <Badge variant="secondary" className="text-xs">Included</Badge>
+                      )}
+                    </div>
+                    <span className="text-gray-600">
+                      {isIncludedInBase ? "—" : `$${ingredient.price.toFixed(2)}`}
+                    </span>
                   </div>
-                  <span className="text-gray-600">${ingredient.price.toFixed(2)}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -122,7 +146,7 @@ export function OrderSummary({
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-600">Price per bar</span>
-              <span>${pricePerBar.toFixed(2)}</span>
+              <span>${basePricePerBar.toFixed(2)}</span>
             </div>
             {ingredientsCost > 0 && (
               <div className="flex justify-between">
@@ -138,7 +162,7 @@ export function OrderSummary({
               <span className="text-gray-600">Shipping</span>
               <span>{shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}</span>
             </div>
-            {quantity >= 12 && (
+            {quantity >= 8 && (
               <div className="flex items-center gap-2 text-green-600">
                 <Sparkles className="w-4 h-4" />
                 <span>Free shipping unlocked!</span>

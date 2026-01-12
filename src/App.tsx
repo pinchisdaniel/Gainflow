@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Button } from "./components/ui/button";
 import { Alert, AlertDescription } from "./components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./components/ui/dialog";
-import { Dumbbell, Check, UserCircle, Gift, AlertTriangle } from "lucide-react";
+import { Dumbbell, Check, UserCircle, Gift, AlertTriangle, Mail } from "lucide-react";
 import { Input } from "./components/ui/input";
 import { Textarea } from "./components/ui/textarea";
 import { toast } from "sonner@2.0.3";
@@ -25,13 +25,22 @@ export default function App() {
   const [showThankYouDialog, setShowThankYouDialog] = useState(false);
   const [showNutritionistDialog, setShowNutritionistDialog] = useState(false);
   const [showDiscountDialog, setShowDiscountDialog] = useState(false);
+  const [hasShownDiscountDialog, setHasShownDiscountDialog] = useState(false);
   const [showInsufficientIngredientsDialog, setShowInsufficientIngredientsDialog] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
+  const [hasSubscribedToNewsletter, setHasSubscribedToNewsletter] = useState(false);
   const [email, setEmail] = useState("");
   const [nutritionistForm, setNutritionistForm] = useState({
     name: "",
     email: "",
     phone: "",
     description: "",
+  });
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
   });
 
   // Calculate nutrition totals
@@ -86,9 +95,10 @@ export default function App() {
     e.preventDefault();
     if (email) {
       toast.success("Subscribed!", {
-        description: `We'll send nutrition tips and exclusive offers to ${email}`,
+        description: `Thank you! Use promo code FIRST10 for 10% off your first order.`,
       });
       setEmail("");
+      setHasSubscribedToNewsletter(true);
     }
   };
 
@@ -107,8 +117,9 @@ export default function App() {
 
   // Show discount dialog when navigating to order tab for the first time
   useEffect(() => {
-    if (activeTab === "order" && !showDiscountDialog) {
+    if (activeTab === "order" && !hasShownDiscountDialog) {
       setShowDiscountDialog(true);
+      setHasShownDiscountDialog(true);
     }
   }, [activeTab]);
 
@@ -195,6 +206,7 @@ export default function App() {
                   quantity={quantity}
                   onQuantityChange={setQuantity}
                   onCheckout={handleCheckout}
+                  hasSubscribedToNewsletter={hasSubscribedToNewsletter}
                 />
               </TabsContent>
             </Tabs>
@@ -229,7 +241,7 @@ export default function App() {
             <div>
               <h4 className="mb-3">Free Shipping</h4>
               <p className="text-gray-600">
-                Orders of 12+ bars ship free. Delivered in 3-5 business days.
+                Orders of 8+ bars ship free. Delivered in 3-5 business days.
               </p>
             </div>
             <div>
@@ -245,7 +257,7 @@ export default function App() {
             <div className="max-w-md mx-auto text-center">
               <h4 className="mb-2">Subscribe to Our Newsletter</h4>
               <p className="text-gray-600 mb-4">Get nutrition tips, recipes, and exclusive offers delivered to your inbox.</p>
-              <form onSubmit={handleSubscribe} className="flex gap-2">
+              <form onSubmit={handleSubscribe} className="flex gap-2 mb-6">
                 <Input
                   type="email"
                   placeholder="Enter your email"
@@ -256,6 +268,14 @@ export default function App() {
                 />
                 <Button type="submit">Subscribe</Button>
               </form>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowContactDialog(true)}
+                className="gap-2"
+              >
+                <Mail className="w-4 h-4" />
+                Contact Us
+              </Button>
             </div>
           </div>
         </div>
@@ -449,6 +469,79 @@ export default function App() {
           >
             Back to Ingredients
           </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Contact Us Dialog */}
+      <Dialog open={showContactDialog} onOpenChange={setShowContactDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Mail className="w-6 h-6 text-green-600" />
+              Contact Us
+            </DialogTitle>
+            <DialogDescription>
+              Get in touch with our support team.
+            </DialogDescription>
+          </DialogHeader>
+          <form 
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              toast.success("Message Sent!", {
+                description: "We'll get back to you as soon as possible!",
+              });
+              setContactForm({
+                name: "",
+                email: "",
+                subject: "",
+                message: "",
+              });
+              setShowContactDialog(false);
+            }}
+          >
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">Name</label>
+              <Input
+                type="text"
+                placeholder="Your Name"
+                value={contactForm.name}
+                onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">Email</label>
+              <Input
+                type="email"
+                placeholder="Your Email"
+                value={contactForm.email}
+                onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">Subject</label>
+              <Input
+                type="text"
+                placeholder="Subject"
+                value={contactForm.subject}
+                onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">Message</label>
+              <Textarea
+                placeholder="Your message..."
+                value={contactForm.message}
+                onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                required
+                rows={4}
+              />
+            </div>
+            <Button type="submit" className="w-full">Send Message</Button>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
