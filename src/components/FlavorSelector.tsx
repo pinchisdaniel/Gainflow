@@ -64,7 +64,7 @@ const flavors: Flavor[] = [
       { name: "Maple syrup", weight: 11.4, calories: 30, protein: 0, fat: 0, carbs: 8 },
       { name: "Vanilla extract", weight: 0.5, calories: 1, protein: 0, fat: 0, carbs: 0 },
       { name: "White chocolate", weight: 10, calories: 54, protein: 0, fat: 6, carbs: 6 },
-      { name: "Crushed hazelnuts", weight: 5, calories: 32.5, protein: 1, fat: 5, carbs: 1 },
+      { name: "Crushed hazelnuts", weight: 5, calories: 32, protein: 1, fat: 5, carbs: 1 },
     ]
   },
   { 

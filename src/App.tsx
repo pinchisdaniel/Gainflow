@@ -5,11 +5,12 @@ import { NutritionPanel } from "./components/NutritionPanel";
 import { ProductPreview } from "./components/ProductPreview";
 import { OrderSummary } from "./components/OrderSummary";
 import { CalorieCalculator } from "./components/CalorieCalculator";
+import { MembershipDialog } from "./components/MembershipDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Button } from "./components/ui/button";
 import { Alert, AlertDescription } from "./components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./components/ui/dialog";
-import { Dumbbell, Check, UserCircle, Gift, AlertTriangle, Mail } from "lucide-react";
+import { Dumbbell, Check, UserCircle, Gift, AlertTriangle, Mail, Crown } from "lucide-react";
 import { Input } from "./components/ui/input";
 import { Textarea } from "./components/ui/textarea";
 import { toast } from "sonner@2.0.3";
@@ -32,6 +33,8 @@ export default function App() {
   const [hasNutAllergy, setHasNutAllergy] = useState(false);
   const [allergenicNuts, setAllergenicNuts] = useState<string[]>([]);
   const [email, setEmail] = useState("");
+  const [showMembershipDialog, setShowMembershipDialog] = useState(false);
+  const [membershipTier, setMembershipTier] = useState<"none" | "free" | "premium" | "elite">("none");
   const [nutritionistForm, setNutritionistForm] = useState({
     name: "",
     email: "",
@@ -195,6 +198,14 @@ export default function App() {
                 <p className="text-gray-600">Starting at</p>
                 <p>€4.99/bar</p>
               </div>
+              <Button 
+                variant={membershipTier !== "none" ? "default" : "outline"} 
+                onClick={() => setShowMembershipDialog(true)} 
+                className="gap-2"
+              >
+                <Crown className="w-4 h-4" />
+                {membershipTier === "none" ? "Become a Member" : `${membershipTier.charAt(0).toUpperCase() + membershipTier.slice(1)} Member`}
+              </Button>
               <Button variant="outline" onClick={handleContactNutritionist} className="gap-2">
                 <UserCircle className="w-4 h-4" />
                 Contact Nutritionist
@@ -556,66 +567,147 @@ export default function App() {
               Get in touch with our support team.
             </DialogDescription>
           </DialogHeader>
-          <form 
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              toast.success("Message Sent!", {
-                description: "We'll get back to you as soon as possible!",
-              });
-              setContactForm({
-                name: "",
-                email: "",
-                subject: "",
-                message: "",
-              });
-              setShowContactDialog(false);
-            }}
-          >
-            <div>
-              <label className="text-sm text-gray-600 mb-1 block">Name</label>
-              <Input
-                type="text"
-                placeholder="Your Name"
-                value={contactForm.name}
-                onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm text-gray-600 mb-1 block">Email</label>
-              <Input
-                type="email"
-                placeholder="Your Email"
-                value={contactForm.email}
-                onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm text-gray-600 mb-1 block">Subject</label>
-              <Input
-                type="text"
-                placeholder="Subject"
-                value={contactForm.subject}
-                onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm text-gray-600 mb-1 block">Message</label>
-              <Textarea
-                placeholder="Your message..."
-                value={contactForm.message}
-                onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                required
-                rows={4}
-              />
-            </div>
-            <Button type="submit" className="w-full">Send Message</Button>
-          </form>
+          
+          <Tabs defaultValue="form" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="form">Send Message</TabsTrigger>
+              <TabsTrigger value="direct">Direct Contact</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="form" className="mt-4">
+              <form 
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  toast.success("Message Sent!", {
+                    description: "We'll get back to you as soon as possible!",
+                  });
+                  setContactForm({
+                    name: "",
+                    email: "",
+                    subject: "",
+                    message: "",
+                  });
+                  setShowContactDialog(false);
+                }}
+              >
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">Name</label>
+                  <Input
+                    type="text"
+                    placeholder="Your Name"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">Email</label>
+                  <Input
+                    type="email"
+                    placeholder="Your Email"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">Subject</label>
+                  <Input
+                    type="text"
+                    placeholder="Subject"
+                    value={contactForm.subject}
+                    onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">Message</label>
+                  <Textarea
+                    placeholder="Your message..."
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                    required
+                    rows={4}
+                  />
+                </div>
+                <Button type="submit" className="w-full">Send Message</Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="direct" className="mt-4">
+              <div className="space-y-6">
+                <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                  <div>
+                    <h4 className="mb-2 flex items-center gap-2">
+                      <Mail className="w-5 h-5 text-gray-600" />
+                      Email
+                    </h4>
+                    <a 
+                      href="mailto:support@gainflow.com" 
+                      className="text-blue-600 hover:underline"
+                    >
+                      support@gainflow.com
+                    </a>
+                    <p className="text-sm text-gray-600 mt-1">
+                      We respond within 24 hours
+                    </p>
+                  </div>
+                  
+                  <div className="border-t border-gray-200 pt-4">
+                    <h4 className="mb-2 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      Phone
+                    </h4>
+                    <a 
+                      href="tel:+31201234567" 
+                      className="text-blue-600 hover:underline"
+                    >
+                      +31 20 123 4567
+                    </a>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Mon-Fri: 9:00 AM - 6:00 PM (CET)
+                    </p>
+                  </div>
+                  
+                  <div className="border-t border-gray-200 pt-4">
+                    <h4 className="mb-2">Office Hours</h4>
+                    <p className="text-sm text-gray-600">
+                      Monday - Friday: 9:00 AM - 6:00 PM<br />
+                      Saturday: 10:00 AM - 4:00 PM<br />
+                      Sunday: Closed
+                    </p>
+                  </div>
+                </div>
+                
+                <p className="text-sm text-gray-500 text-center italic">
+                  For urgent matters, please call us directly during business hours.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
+
+      {/* Membership Dialog */}
+      <MembershipDialog
+        open={showMembershipDialog}
+        onOpenChange={setShowMembershipDialog}
+        currentTier={membershipTier}
+        onSelectTier={(tier) => {
+          setMembershipTier(tier);
+          const tierNames = {
+            free: "Free",
+            premium: "Premium",
+            elite: "Elite",
+          };
+          toast.success("Membership Activated!", {
+            description: `Welcome to ${tierNames[tier]} membership! Your benefits are now active.`,
+          });
+        }}
+      />
     </div>
   );
 }
