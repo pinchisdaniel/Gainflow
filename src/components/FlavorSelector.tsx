@@ -33,7 +33,7 @@ const flavors: Flavor[] = [
   { 
     name: "Forest Fruits", 
     color: "#C85A7D", // Berry/pink-red color to match forest fruits bar
-    calories: 645,
+    calories: 650,
     totalProtein: 31,
     totalFat: 44,
     totalCarbs: 28,
@@ -51,7 +51,7 @@ const flavors: Flavor[] = [
   { 
     name: "Vanilla Dream", 
     color: "#F4E4C1", // Vanilla/cream color to match vanilla bar
-    calories: 681,
+    calories: 653,
     totalProtein: 34,
     totalFat: 49,
     totalCarbs: 21,
@@ -70,7 +70,7 @@ const flavors: Flavor[] = [
   { 
     name: "Chocolate", 
     color: "#5D4037", // Rich chocolate brown to match chocolate bar
-    calories: 650,
+    calories: 646,
     totalProtein: 34,
     totalFat: 53,
     totalCarbs: 28,
@@ -90,7 +90,7 @@ const flavors: Flavor[] = [
   { 
     name: "Matcha Pistachio", 
     color: "#A8D5BA", // Matcha green to match matcha pistachio bar
-    calories: 653,
+    calories: 681,
     totalProtein: 28,
     totalFat: 50.5,
     totalCarbs: 43.5,

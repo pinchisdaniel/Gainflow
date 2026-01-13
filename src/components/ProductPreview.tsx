@@ -6,7 +6,6 @@ const forestFruitsImage = "/assets/fruits.png";
 const matchaImage = "/assets/pistachio.png";
 const vanillaImage = "/assets/vanilla.png";
 
-
 interface ProductPreviewProps {
   flavor: string;
   ingredientCount: number;
